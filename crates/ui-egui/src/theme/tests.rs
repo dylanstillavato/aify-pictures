@@ -362,3 +362,61 @@ fn breeze_themes_parse_and_meet_text_contrast() {
         assert!(contrast(t.caption_close_text, t.caption_close) >= 4.5, "{kind:?}: close button glyph");
     }
 }
+
+#[test]
+fn aify_and_retro_themes_parse_and_hold_their_design() {
+    for (kind, id, label, aliases) in [(ThemeKind::Aify, "aify", "Aify", ["Aify", "aify pictures"]), (ThemeKind::Retro, "retro", "Retro", ["retro", "1-bit"])] {
+        assert_eq!(kind.id(), id);
+        assert_eq!(kind.label(), label);
+        assert_eq!(ThemeKind::from_name(id), Some(kind));
+        for alias in aliases {
+            assert_eq!(ThemeKind::from_name(alias), Some(kind), "{alias}");
+        }
+        assert!(ThemeKind::ALL.contains(&kind));
+        let t = Tokens::for_kind(kind);
+        assert_eq!(t.kind, kind);
+        assert!(!t.pro && !t.bevel, "{kind:?} uses the Studio layout");
+        // Body text reads on every surface it sits on, also hovered and pressed.
+        for surface in [t.chrome, t.dock, t.card, t.field, t.hover, t.pressed] {
+            assert!(contrast(t.text, surface) >= 7.0, "{kind:?}: text on {surface:?}");
+            assert!(contrast(t.text_dim, surface) >= 4.5, "{kind:?}: dim text on {surface:?}");
+        }
+        for k in [1.0, 0.93, 0.85] {
+            assert!(contrast(t.primary_text, t.primary_bg.gamma_multiply(k)) >= 4.5, "{kind:?}: primary at {k}");
+        }
+    }
+    // "classic" still names Classic; "retro" is now its own theme.
+    assert_eq!(ThemeKind::from_name("classic"), Some(ThemeKind::Classic));
+
+    let a = Tokens::for_kind(ThemeKind::Aify);
+    assert!(a.dark() && a.floating_cards() && !a.retro());
+    assert_eq!(a.accent, Color32::from_rgb(0x1D, 0x5F, 0xE0), "Aify blue");
+    assert_eq!(a.accent_text, Color32::from_rgb(0xD7, 0xFF, 0x3D), "lime for what is selected");
+    assert_eq!(a.primary_bg, a.accent);
+    assert!((14.0..=18.0).contains(&a.radius) && a.radius_lg >= a.radius, "very round cards");
+    assert!(a.panel_gap() > Tokens::for_kind(ThemeKind::Studio).panel_gap(), "panels float apart");
+    // The lime highlight reads on the blue-tinted selection and on the cards.
+    let tint = |under: Color32| {
+        let k = f32::from(a.accent_soft.a()) / 255.0;
+        let ch = |over: u8, under: u8| (f32::from(over) * k + f32::from(under) * (1.0 - k)).round() as u8;
+        Color32::from_rgb(ch(a.accent.r(), under.r()), ch(a.accent.g(), under.g()), ch(a.accent.b(), under.b()))
+    };
+    for surface in [a.card, a.field, tint(a.card), tint(a.dock)] {
+        assert!(contrast(a.accent_text, surface) >= 4.5, "lime on {surface:?}");
+    }
+    // Cards sit a few levels above the near-black base, rimmed by a lighter line.
+    let lum = |c: Color32| u32::from(c.r()) + u32::from(c.g()) + u32::from(c.b());
+    assert!(lum(a.dock) < lum(a.card) && lum(a.card) < lum(a.card_border) && lum(a.card) < 3 * 32, "graphite on near-black");
+
+    let r = Tokens::for_kind(ThemeKind::Retro);
+    assert!(!r.dark() && r.retro() && !r.floating_cards() && !r.round_chips);
+    assert_eq!((r.radius_sm, r.radius, r.radius_lg), (0.0, 0.0, 0.0), "no rounding");
+    assert_eq!((r.card, r.field, r.chrome), (Color32::WHITE, Color32::WHITE, Color32::WHITE));
+    assert_eq!((r.text, r.card_border, r.separator, r.shadow), (Color32::BLACK, Color32::BLACK, Color32::BLACK, Color32::BLACK));
+    assert!(r.dock.r() == r.dock.g() && r.dock.g() == r.dock.b() && (100..220).contains(&r.dock.r()), "grey desktop");
+    let ctx = egui::Context::default();
+    apply(&ctx, ThemeKind::Retro);
+    let shadow = ctx.global_style().visuals.window_shadow;
+    assert_eq!((shadow.blur, shadow.color), (0, Color32::BLACK), "hard square shadow");
+    assert_eq!(ctx.global_style().text_styles.get(&TextStyle::Body).map(|f| f.family.clone()), Some(FontFamily::Monospace));
+}

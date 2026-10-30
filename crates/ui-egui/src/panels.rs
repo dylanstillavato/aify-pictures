@@ -1306,6 +1306,8 @@ mod toolbar_tests {
             crate::theme::ThemeKind::AdwaitaDark,
             crate::theme::ThemeKind::SolarizedDark,
             crate::theme::ThemeKind::BreezeDark,
+            crate::theme::ThemeKind::Aify,
+            crate::theme::ThemeKind::Retro,
         ] {
             let app = PhotocraftApp::new(photocraft_engine::Session::new(), crate::Services::default());
             let mut h = egui_kittest::Harness::builder().with_size(vec2(800.0, 1400.0)).build_ui_state(

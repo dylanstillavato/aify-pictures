@@ -13,6 +13,13 @@
 //!   (blue-grey surfaces, Breeze blue accent, 5 px corners), so the app sits with the rest of a
 //!   Plasma desktop.
 //!
+//! - **Aify**: Aify Pictures' own dark look (the web build's default). Near-black graphite cards
+//!   floating apart on an even darker base, very round corners, pill tabs, Aify blue (#1D5FE0)
+//!   for actions and lime (#D7FF3D) for what is selected or active.
+//! - **Retro**: a tribute to the black-and-white desktop editors of 1990, our own design: 1-bit
+//!   black on white, a grey desktop, panel title strips with horizontal rules, 1 px black borders,
+//!   hard square shadows, no rounding and the monospaced face for body text.
+//!
 //! - **Pro (Light Gray)** and **Pro (Light)**: Photoshop's third and fourth interface brightness
 //!   levels (#B8B8B8 and #F0F0F0 panels) with the Pro layout (#2661).
 //!
@@ -52,10 +59,16 @@ pub enum ThemeKind {
     SoftDark,
     /// A low-contrast light theme: pale violet-grey surfaces, softened dark text and a periwinkle accent.
     SoftLight,
+    /// Aify Pictures' own dark theme: floating graphite cards, very round corners, Aify blue
+    /// actions and a lime highlight for what is selected or active (the web build's default).
+    Aify,
+    /// A light 1-bit tribute to the black-and-white desktop editors of 1990: white panels with
+    /// striped title strips, 1 px black borders and hard shadows on a grey desktop.
+    Retro,
 }
 
 impl ThemeKind {
-    pub const ALL: [ThemeKind; 14] = [
+    pub const ALL: [ThemeKind; 16] = [
         ThemeKind::Pro,
         ThemeKind::ProMedium,
         ThemeKind::ProLightGray,
@@ -70,6 +83,8 @@ impl ThemeKind {
         ThemeKind::BreezeDark,
         ThemeKind::SoftDark,
         ThemeKind::SoftLight,
+        ThemeKind::Aify,
+        ThemeKind::Retro,
     ];
     pub fn label(self) -> &'static str {
         match self {
@@ -87,6 +102,8 @@ impl ThemeKind {
             ThemeKind::BreezeDark => "Breeze Dark",
             ThemeKind::SoftDark => "Soft Dark",
             ThemeKind::SoftLight => "Soft Light",
+            ThemeKind::Aify => "Aify",
+            ThemeKind::Retro => "Retro",
         }
     }
     /// The canonical name: `ui.set {theme}` accepts it and the Window › Theme commands are
@@ -107,6 +124,8 @@ impl ThemeKind {
             ThemeKind::BreezeDark => "breezeDark",
             ThemeKind::SoftDark => "softDark",
             ThemeKind::SoftLight => "softLight",
+            ThemeKind::Aify => "aify",
+            ThemeKind::Retro => "retro",
         }
     }
     /// Photoshop-grammar layout (tab strips, flat panels): the four Pro brightness levels.
@@ -124,6 +143,7 @@ impl ThemeKind {
                 | ThemeKind::AdwaitaDark
                 | ThemeKind::BreezeDark
                 | ThemeKind::SoftDark
+                | ThemeKind::Aify
         )
     }
     /// Whether this theme belongs to the light appearance family.
@@ -142,7 +162,7 @@ impl ThemeKind {
             "prolight" | "prolightest" | "lightest" | "light" => Some(ThemeKind::ProLight),
             "studio" | "studiodark" => Some(ThemeKind::Studio),
             "studiolight" => Some(ThemeKind::StudioLight),
-            "classic" | "win2000" | "retro" => Some(ThemeKind::Classic),
+            "classic" | "win2000" => Some(ThemeKind::Classic),
             "adwaita" | "adwaitalight" | "gnome" | "gnomelight" => Some(ThemeKind::Adwaita),
             "adwaitadark" | "gnomedark" => Some(ThemeKind::AdwaitaDark),
             "solarizeddark" | "solarized" => Some(ThemeKind::SolarizedDark),
@@ -150,6 +170,8 @@ impl ThemeKind {
             "breezedark" | "kdedark" | "plasmadark" => Some(ThemeKind::BreezeDark),
             "softdark" => Some(ThemeKind::SoftDark),
             "softlight" => Some(ThemeKind::SoftLight),
+            "aify" | "aifydark" | "aifypictures" => Some(ThemeKind::Aify),
+            "retro" | "retro1bit" | "1bit" | "mono" | "monochrome" => Some(ThemeKind::Retro),
             _ => None,
         }
     }
@@ -718,6 +740,94 @@ impl Tokens {
                 caption_close_text: Color32::WHITE,
                 scrim: Color32::from_black_alpha(90),
             },
+            // Aify: our own dark palette. A near-black base (canvas surround and the gaps between
+            // panels) under graphite cards that are only a few levels lighter, each with a thin,
+            // lighter rim so they read as glass panes floating over the base. Aify blue carries
+            // actions and the primary button; lime marks what is selected or active.
+            ThemeKind::Aify => Tokens {
+                kind,
+                chrome: Color32::from_rgb(12, 13, 16),
+                canvas: Color32::from_rgb(9, 10, 12),
+                canvas_dot: Color32::from_rgb(9, 10, 12),
+                dock: Color32::from_rgb(9, 10, 12),
+                card: Color32::from_rgb(22, 23, 27),
+                card_border: Color32::from_rgb(44, 46, 54),
+                field: Color32::from_rgb(32, 34, 40),
+                field_border: Color32::from_rgb(44, 47, 56),
+                hover: Color32::from_rgb(38, 40, 47),
+                pressed: Color32::from_rgb(48, 51, 60),
+                text: Color32::from_rgb(228, 230, 236),
+                text_dim: Color32::from_rgb(160, 164, 176),
+                text_faint: Color32::from_rgb(112, 117, 130),
+                icon: Color32::from_rgb(200, 203, 212),
+                accent: Color32::from_rgb(0x1D, 0x5F, 0xE0),
+                accent_soft: Color32::from_rgba_unmultiplied(0x1D, 0x5F, 0xE0, 64),
+                accent_border: Color32::from_rgba_unmultiplied(0xD7, 0xFF, 0x3D, 150),
+                accent_text: Color32::from_rgb(0xD7, 0xFF, 0x3D),
+                separator: Color32::from_rgb(34, 36, 42),
+                shadow: Color32::from_black_alpha(170),
+                primary_bg: Color32::from_rgb(0x1D, 0x5F, 0xE0),
+                primary_text: Color32::WHITE,
+                danger: Color32::from_rgb(244, 104, 104),
+                warning: Color32::from_rgb(242, 192, 92),
+                radius_sm: 9.0,
+                radius: 14.0,
+                radius_lg: 18.0,
+                bevel: false,
+                pro: false,
+                round_chips: true,
+                tab_strip: Color32::TRANSPARENT,
+                row_selected: Color32::TRANSPARENT,
+                histogram_bg: Color32::from_rgb(9, 10, 12),
+                histogram_level: 225,
+                caption_close: Color32::from_rgb(196, 43, 28),
+                caption_close_text: Color32::WHITE,
+                scrim: Color32::from_black_alpha(120),
+            },
+            // Retro: our own 1-bit design in the spirit of the black-and-white desktop editors of
+            // 1990. Black on white panels framed by 1 px black lines and hard square shadows on a
+            // grey desktop; selections are a flat grey tint (the panels have no other greys but the
+            // dimmed text), and the primary button is inverted.
+            ThemeKind::Retro => Tokens {
+                kind,
+                chrome: Color32::WHITE,
+                canvas: Color32::from_rgb(168, 168, 168),
+                canvas_dot: Color32::from_rgb(128, 128, 128),
+                dock: Color32::from_rgb(168, 168, 168),
+                card: Color32::WHITE,
+                card_border: Color32::BLACK,
+                field: Color32::WHITE,
+                field_border: Color32::BLACK,
+                hover: Color32::from_rgb(224, 224, 224),
+                pressed: Color32::from_rgb(192, 192, 192),
+                text: Color32::BLACK,
+                text_dim: Color32::from_rgb(56, 56, 56),
+                text_faint: Color32::from_rgb(96, 96, 96),
+                icon: Color32::BLACK,
+                accent: Color32::BLACK,
+                accent_soft: Color32::from_black_alpha(56),
+                accent_border: Color32::BLACK,
+                accent_text: Color32::BLACK,
+                separator: Color32::BLACK,
+                shadow: Color32::BLACK,
+                primary_bg: Color32::BLACK,
+                primary_text: Color32::WHITE,
+                danger: Color32::from_rgb(160, 0, 0),
+                warning: Color32::from_rgb(112, 80, 0),
+                radius_sm: 0.0,
+                radius: 0.0,
+                radius_lg: 0.0,
+                bevel: false,
+                pro: false,
+                round_chips: false,
+                tab_strip: Color32::TRANSPARENT,
+                row_selected: Color32::TRANSPARENT,
+                histogram_bg: Color32::from_gray(40),
+                histogram_level: 240,
+                caption_close: Color32::BLACK,
+                caption_close_text: Color32::WHITE,
+                scrim: Color32::from_black_alpha(110),
+            },
             // Ethan Schoonover's Solarized Dark palette: base03 canvas, base02 surfaces, base0
             // body text and the Solarized blue accent. https://ethanschoonover.com/solarized/
             // (MIT; see LICENSE-solarized.txt)
@@ -842,6 +952,23 @@ impl Tokens {
 
     pub fn dark(&self) -> bool {
         self.kind.is_dark()
+    }
+
+    /// Retro: panel title strips are ruled with horizontal lines, the tabs sitting on them as
+    /// white labels, and shadows are hard and square instead of blurred.
+    pub fn retro(&self) -> bool {
+        self.kind == ThemeKind::Retro
+    }
+
+    /// The space between docked panels, and round them and the window's edges: Aify's panels
+    /// float apart as rounded cards; every other theme keeps the dock's 4 pt seams.
+    pub fn panel_gap(&self) -> f32 {
+        if self.kind == ThemeKind::Aify { 10.0 } else { 4.0 }
+    }
+
+    /// Whether docked panels are drawn as separate rounded cards over the dock colour.
+    pub fn floating_cards(&self) -> bool {
+        self.kind == ThemeKind::Aify
     }
 }
 
@@ -1037,6 +1164,14 @@ pub fn apply(ctx: &egui::Context, kind: ThemeKind) {
     v.menu_corner_radius = CornerRadius::same(t.radius as u8);
     v.window_shadow = egui::Shadow { offset: [0, 10], blur: 32, spread: 0, color: t.shadow };
     v.popup_shadow = egui::Shadow { offset: [0, 6], blur: 20, spread: 0, color: t.shadow };
+    if t.retro() {
+        // Hard, square drop shadows, offset down and to the right.
+        v.window_shadow = egui::Shadow { offset: [3, 3], blur: 0, spread: 0, color: t.shadow };
+        v.popup_shadow = egui::Shadow { offset: [2, 2], blur: 0, spread: 0, color: t.shadow };
+    } else if t.floating_cards() {
+        v.window_shadow = egui::Shadow { offset: [0, 14], blur: 44, spread: 0, color: t.shadow };
+        v.popup_shadow = egui::Shadow { offset: [0, 8], blur: 28, spread: 0, color: t.shadow };
+    }
     v.selection.bg_fill = if t.bevel || t.pro { t.accent } else { t.accent_soft };
     v.selection.stroke = Stroke::new(1.0, t.accent_text);
     v.slider_trailing_fill = true;
@@ -1064,21 +1199,34 @@ pub fn apply(ctx: &egui::Context, kind: ThemeKind) {
     }
     ctx.set_visuals(v);
     ctx.global_style_mut(|s| {
-        s.text_styles = [
-            (TextStyle::Small, FontId::proportional(10.5)),
-            (TextStyle::Body, FontId::proportional(if t.pro { 12.0 } else { 12.5 })),
-            (TextStyle::Button, FontId::proportional(if t.pro { 12.0 } else { 12.5 })),
-            (TextStyle::Heading, semibold(15.0)),
-            (TextStyle::Monospace, FontId::monospace(12.0)),
-        ]
-        .into();
+        s.text_styles = if t.retro() {
+            // No bitmap face ships with the app (fonts live in craft-fonts), so Retro sets its
+            // body text in the bundled monospaced face for the same typewritten feel.
+            [
+                (TextStyle::Small, FontId::monospace(10.5)),
+                (TextStyle::Body, FontId::monospace(12.5)),
+                (TextStyle::Button, FontId::monospace(12.5)),
+                (TextStyle::Heading, FontId::monospace(15.0)),
+                (TextStyle::Monospace, FontId::monospace(12.0)),
+            ]
+            .into()
+        } else {
+            [
+                (TextStyle::Small, FontId::proportional(10.5)),
+                (TextStyle::Body, FontId::proportional(if t.pro { 12.0 } else { 12.5 })),
+                (TextStyle::Button, FontId::proportional(if t.pro { 12.0 } else { 12.5 })),
+                (TextStyle::Heading, semibold(15.0)),
+                (TextStyle::Monospace, FontId::monospace(12.0)),
+            ]
+            .into()
+        };
         s.spacing.item_spacing = egui::vec2(8.0, 6.0);
         s.spacing.button_padding = egui::vec2(10.0, 4.0);
         s.spacing.interact_size = egui::vec2(24.0, 24.0);
         s.spacing.slider_width = 150.0;
         s.spacing.combo_width = 120.0;
         s.spacing.menu_margin = egui::Margin::same(6);
-        s.spacing.window_margin = egui::Margin::same(16);
+        s.spacing.window_margin = egui::Margin::same(if t.floating_cards() { 18 } else { 16 });
         s.spacing.icon_width = 14.0;
         s.visuals.indent_has_left_vline = false;
         s.interaction.tooltip_delay = TOOLTIP_DELAY;

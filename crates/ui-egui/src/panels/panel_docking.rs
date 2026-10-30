@@ -571,6 +571,28 @@ pub(crate) fn show(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     style.accent = t.accent;
     style.right_to_left = crate::direction::is_rtl();
     style.new_dock_zones = true;
+    let cards = t.floating_cards() || t.retro();
+    if cards {
+        // Aify and Retro draw each docked group as its own card (see `card_slot`) over the dock
+        // colour, which shows in the gaps between them and along the window's edges.
+        style.gap = t.panel_gap().max(if t.retro() { 8.0 } else { 0.0 });
+        style.background = egui::Color32::TRANSPARENT;
+        style.active_background = egui::Color32::TRANSPARENT;
+        style.tab_background = egui::Color32::TRANSPARENT;
+        ui.painter().rect_filled(ui.max_rect(), 0.0, t.dock);
+    }
+    if t.floating_cards() {
+        // Rounded cards draw their own rim; the active tab's label is lime.
+        style.border = egui::Stroke::NONE;
+        style.text = t.accent_text;
+    }
+    if t.retro() {
+        // White tab labels sit on the ruled title strip; the active one in black, the others grey.
+        style.tab_background = egui::Color32::WHITE;
+        style.active_background = egui::Color32::WHITE;
+        style.text = t.text;
+        style.inactive_text = t.text_faint;
+    }
     let style = style.localized(|key| DOCK_LABELS.iter().find(|(k, _)| *k == key).map(|(_, english)| tl!(english).to_string()));
     let mut dock = craft_ui::docking::DockArea::new(area)
         .locked(locked)
@@ -591,8 +613,11 @@ pub(crate) fn show(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     ui.ctx().data_mut(|data| data.insert_temp(bodies_id(), Vec::<(String, egui::Rect)>::new()));
     // The panel windows' passes, inside this call, note their keyboard focus again.
     keyboard_focus(ui.ctx()).lock().unwrap_or_else(|e| e.into_inner()).clear();
+    // Aify's cards float apart from the window's edges as well as from each other.
+    let inset = if cards { style.gap } else { 0.0 };
+    let mut inset_ui = ui.new_child(egui::UiBuilder::new().max_rect(ui.max_rect().shrink(inset)));
     let mut output = dock.show_customized(
-        ui,
+        if inset > 0.0 { &mut inset_ui } else { ui },
         &layout,
         &style,
         |id| PANELS.iter().find(|p| p.0 == id).map(|p| tl!(p.1).to_string()).unwrap_or_else(|| id.clone()),
@@ -1218,6 +1243,7 @@ impl craft_ui::docking::DockContent<String> for PanelContent<'_> {
             crate::panels::canvas_panel(self.app, ui);
             return;
         }
+        fill_card_slot(ui, id, self.strip);
         let viewport = ui.ctx().viewport_id();
         if viewport != egui::ViewportId::ROOT && ui.memory(|m| m.focused().is_some()) {
             keyboard_focus(ui.ctx()).lock().unwrap_or_else(|e| e.into_inner()).insert(viewport);
@@ -1239,6 +1265,12 @@ impl craft_ui::docking::DockContent<String> for PanelContent<'_> {
     fn panel_menu(&mut self, ui: &mut egui::Ui, id: &String) {
         panel_menu(self.app, ui, id);
     }
+    fn label(&mut self, ui: &egui::Ui, _panel: &String, logical: &str, _font: &egui::FontId, color: egui::Color32) -> egui::WidgetText {
+        // The style's text override would paint every tab the same colour; the card themes mark
+        // the active tab by its colour alone (Aify's lime, Retro's black over grey).
+        let t = crate::theme::Tokens::get(ui.ctx());
+        if t.floating_cards() || t.retro() { egui::RichText::new(logical).color(color).into() } else { logical.into() }
+    }
     fn allow_native(&self, id: &String) -> bool {
         !self.card.contains(id)
     }
@@ -1246,6 +1278,9 @@ impl craft_ui::docking::DockContent<String> for PanelContent<'_> {
         28.0
     }
     fn group_header(&mut self, ui: &mut egui::Ui, panels: &[String], active: &String, floating: bool) {
+        if !floating {
+            reserve_card_slot(ui, active);
+        }
         let collapsed = panels.iter().all(|id| self.collapsed.contains(id));
         let locked = self.app.session.prefs().workspace_locked;
         let resp = crate::icons::button(ui, "ellipsis", ui.available_height().min(28.0), false, tl!("Panel menu"));
@@ -1279,6 +1314,61 @@ impl craft_ui::docking::DockContent<String> for PanelContent<'_> {
             }
         });
     }
+}
+
+/// Where a docked group's card goes: a shape slot taken in the group's layer by its header, which
+/// craft-ui draws after the strip's fill and before the tabs, so the card filled in later (by the
+/// body, once its rect is known) sits under the tabs and the panel's contents.
+fn card_slot_id(panel: &str) -> egui::Id {
+    egui::Id::unique(("photocraft-dock-card", panel))
+}
+
+fn reserve_card_slot(ui: &egui::Ui, panel: &str) {
+    let t = crate::theme::Tokens::get(ui.ctx());
+    if !(t.floating_cards() || t.retro()) {
+        return;
+    }
+    let idx = ui.painter().add(egui::Shape::Noop);
+    ui.ctx().data_mut(|d| d.insert_temp(card_slot_id(panel), (ui.layer_id(), idx)));
+}
+
+/// Fill the slot [`reserve_card_slot`] took for `panel`'s group, now that the body rect (under a
+/// `strip` tall tab strip) is known: Aify's rounded graphite card with its light rim, or Retro's
+/// white window with a hard shadow and a title strip ruled with horizontal lines.
+fn fill_card_slot(ui: &egui::Ui, panel: &str, strip: f32) {
+    let id = card_slot_id(panel);
+    let Some((layer, idx)) = ui.ctx().data_mut(|d| {
+        let slot = d.get_temp::<(egui::LayerId, egui::layers::ShapeIdx)>(id);
+        d.remove::<(egui::LayerId, egui::layers::ShapeIdx)>(id);
+        slot
+    }) else {
+        return;
+    };
+    let t = crate::theme::Tokens::get(ui.ctx());
+    let body = ui.max_rect();
+    if !body.is_finite() || body.width() <= 0.0 {
+        return;
+    }
+    let card = egui::Rect::from_min_max(egui::pos2(body.left(), body.top() - strip), body.max);
+    let mut shapes = Vec::new();
+    if t.retro() {
+        let ink = egui::Color32::BLACK;
+        shapes.push(egui::Shape::rect_filled(card.translate(egui::vec2(3.0, 3.0)), 0.0, t.shadow));
+        shapes.push(egui::Shape::rect_filled(card, 0.0, t.card));
+        // The title strip: horizontal 1 px rules with a 1 px gap, inset from its edges, over a
+        // line that closes it off from the body.
+        let rules = egui::Rect::from_min_max(egui::pos2(card.left() + 3.0, card.top() + 9.0), egui::pos2(card.right() - 3.0, body.top() - 9.0));
+        let mut y = rules.top() + 0.5;
+        while y < rules.bottom() {
+            shapes.push(egui::Shape::hline(rules.x_range(), y, egui::Stroke::new(1.0, ink)));
+            y += 2.0;
+        }
+        shapes.push(egui::Shape::hline(card.x_range(), body.top() - 0.5, egui::Stroke::new(1.0, ink)));
+    } else {
+        let radius = t.radius_lg;
+        shapes.push(egui::Shape::Rect(egui::epaint::RectShape::new(card, radius, t.card, egui::Stroke::new(1.0, t.card_border), egui::StrokeKind::Inside)));
+    }
+    ui.ctx().layer_painter(layer).set(idx, egui::Shape::Vec(shapes));
 }
 
 pub(crate) fn sync_visibility(app: &mut PhotocraftApp) {

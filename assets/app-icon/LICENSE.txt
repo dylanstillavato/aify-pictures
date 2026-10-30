@@ -1,13 +1,9 @@
-PhotoCraft app icon (photocraft.svg, photocraft-small.svg and every file derived from them in
-this directory: photocraft-1024.png, photocraft.icns, photocraft.ico, hicolor/).
+Icono de Aify Pictures (photocraft.svg, photocraft-small.svg, photocraft-1024.png y hicolor/).
 
-Original artwork made for this project by the project owner: an engraving-style drawing created
-in ArtCraft, then vectorised. No third-party material. Licensed like the rest of PhotoCraft,
-under either of
+Obra original de Aify para este fork. Con la misma licencia que el resto del proyecto, a elegir:
 
   * Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
   * MIT license (https://opensource.org/licenses/MIT)
 
-at your option.
-
-Regenerate the derived files with packaging/icons.sh.
+photocraft.ico y photocraft.icns aún son el icono original de PhotoCraft (obra del propietario
+del proyecto PhotoCraft, con la misma licencia MIT o Apache-2.0).

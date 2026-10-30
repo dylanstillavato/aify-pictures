@@ -1,3 +1,14 @@
+Aify Pictures
+Copyright (c) 2026 Aify y los colaboradores de Aify Pictures.
+
+Aify Pictures es un fork de PhotoCraft (https://github.com/storytold/photocraft), con la misma
+licencia: MIT o Apache-2.0, a elegir (LICENSE-MIT, LICENSE-APACHE). Los cambios de Aify están en
+el historial de git de este repositorio. El aviso original de PhotoCraft sigue a continuación.
+El nombre, el logotipo y las marcas de ArtCraft se han retirado de este fork, como piden sus
+condiciones (el antiguo docs/brand/LICENSE-brand.txt).
+
+----
+
 PhotoCraft
 Copyright (c) 2026 ArtCraft Team and the PhotoCraft contributors.
 Licensed under the MIT License or the Apache License, Version 2.0, at your option

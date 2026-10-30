@@ -330,10 +330,10 @@ mod boot {
                 };
                 web_sys::console::error_2(&JsValue::from_str("photocraft-web-boot: could not start PhotoCraft:"), &error);
                 let Some(&wait) = RETRY_AFTER.get(attempt) else {
-                    say("PhotoCraft couldn't be downloaded. Check your connection, then try again: ", true);
+                    say("No se ha podido descargar Aify Pictures. Revisa la conexión y vuelve a intentarlo: ", true);
                     return;
                 };
-                say("Loading PhotoCraft\u{2026} (the download failed, trying again)", false);
+                say("Cargando Aify Pictures\u{2026} (la descarga falló, lo intento otra vez)", false);
                 sleep(wait).await;
                 attempt += 1;
             }

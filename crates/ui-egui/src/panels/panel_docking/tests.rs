@@ -891,3 +891,27 @@ fn the_native_dock_width_sizes_the_default_column() {
     assert_eq!(columns[0].width, 380.0);
     assert!(h.ctx.data_mut(|data| data.get_persisted::<egui::PanelState>(key)).is_none(), "taken once");
 }
+
+/// The Aify and Retro themes dock Properties between Color and Layers, as Pro does, instead of
+/// floating it over the canvas (and the Home screen), also in a ~1500×800 browser window.
+#[test]
+fn aify_and_retro_dock_properties_like_pro() {
+    use crate::theme::ThemeKind;
+    for kind in [ThemeKind::Aify, ThemeKind::Retro] {
+        assert!(!kind.floats_properties() && ThemeKind::Studio.floats_properties() && !ThemeKind::Pro.floats_properties());
+        let mut h = harness(app(), vec2(1512.0, 793.0));
+        let ctx = h.ctx.clone();
+        h.state_mut().apply_theme(&ctx, kind);
+        h.run_steps(4);
+        let layout = legacy(h.state());
+        assert!(layout.floating.is_empty(), "{kind:?}: nothing floats: {layout:?}");
+        let groups = root_groups(&layout);
+        assert_eq!(groups.len(), 3, "{kind:?}: {groups:?}");
+        assert!(groups[0].iter().any(|p| p == "color") && groups[2].iter().any(|p| p == "layers"), "{kind:?}: {groups:?}");
+        assert_eq!(groups[1], ["properties", "adjustments"], "{kind:?}: Properties between Color and Layers");
+        let canvas = canvas_rect(&h);
+        let tops: Vec<f32> = ["color", "properties", "layers"].iter().map(|panel| tab_rect(&h, panel).top()).collect();
+        assert!(tops.windows(2).all(|pair| pair[0] < pair[1]), "{kind:?}: top to bottom: {tops:?}");
+        assert!(tab_rect(&h, "properties").left() > canvas.right(), "{kind:?}: Properties is in the dock column");
+    }
+}

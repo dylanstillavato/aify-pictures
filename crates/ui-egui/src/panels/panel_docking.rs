@@ -163,7 +163,8 @@ fn legacy(app: &PhotocraftApp) -> Layout<String> {
 
 /// The native dock's arrangement as a craft-ui layout: the canvas beside one dock column of the
 /// shown groups, top to bottom, with their tab order, selected tab and user-set heights. The
-/// Studio themes float Properties over the canvas's top right corner. `all` includes the groups
+/// Studio themes float Properties over the canvas's top right corner
+/// ([`crate::theme::ThemeKind::floats_properties`]). `all` includes the groups
 /// that are not shown, with every tab.
 fn legacy_layout(app: &PhotocraftApp, all: bool) -> Layout<String> {
     let pro = app.ui.theme.is_pro();
@@ -178,7 +179,7 @@ fn legacy_layout(app: &PhotocraftApp, all: bool) -> Layout<String> {
         }
         let selected = *group.tab_mut(&mut app.ui.dock_tabs.clone());
         let active = labels.get(selected).and_then(|label| normalize(label)).and_then(|id| panels.iter().position(|p| p == id)).unwrap_or(0);
-        if group == Group::Properties && !pro {
+        if group == Group::Properties && app.ui.theme.floats_properties() {
             floating.push(Floating::single(panels, active, studio_properties_rect(app)).with_id(PROPERTIES_WINDOW));
             continue;
         }

@@ -9,8 +9,8 @@ pub fn properties_window(app: &mut PhotocraftApp, ctx: &egui::Context) {
     if app.ui.docking.is_some() {
         return;
     }
-    // Pro (Photoshop) docks Properties; Studio floats it over the canvas.
-    if !app.ui.panels.properties || Tokens::get(ctx).pro {
+    // Pro (Photoshop), Aify and Retro dock Properties; Studio floats it over the canvas.
+    if !app.ui.panels.properties || !Tokens::get(ctx).kind.floats_properties() {
         return;
     }
     if app.session.active().is_none() {

@@ -56,7 +56,7 @@ fn rail(app: &mut PhotocraftApp, ui: &mut egui::Ui, t: &Tokens) {
             ];
             for (icon, name, g) in entries {
                 // Studio floats Properties outside the dock.
-                let docked = t.pro || g != Group::Properties;
+                let docked = !t.kind.floats_properties() || g != Group::Properties;
                 let on = if customized { crate::panel_docking::rail_on(app, g) } else { g.shown(&p) && !(docked && app.ui.dock.is_collapsed(g)) };
                 if icons::rail_button(ui, icon, rb, on, name).clicked() {
                     if customized {

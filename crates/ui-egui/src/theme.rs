@@ -132,6 +132,12 @@ impl ThemeKind {
     pub fn is_pro(self) -> bool {
         matches!(self, ThemeKind::Pro | ThemeKind::ProMedium | ThemeKind::ProLightGray | ThemeKind::ProLight)
     }
+    /// The Studio-layout themes float Properties as a card over the canvas; the Pro themes, Aify
+    /// and Retro dock it in the panel column between Color and Layers, where it does not cover
+    /// the canvas or the Home screen.
+    pub fn floats_properties(self) -> bool {
+        !self.is_pro() && !matches!(self, ThemeKind::Aify | ThemeKind::Retro)
+    }
     /// Whether this theme belongs to the dark appearance family.
     pub fn is_dark(self) -> bool {
         matches!(

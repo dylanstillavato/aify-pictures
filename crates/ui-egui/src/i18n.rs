@@ -24,6 +24,8 @@ mod catalog;
 mod system;
 
 pub use system::system_lang;
+#[cfg(target_arch = "wasm32")]
+pub use system::set_web_tags;
 
 use std::cell::Cell;
 use std::sync::OnceLock;

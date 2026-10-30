@@ -9,7 +9,8 @@ const MAX_SYSTEM_TAG_BYTES: usize = 128;
 
 /// Resolve Auto against the current registry. Cache the OS's tags, rather than a language,
 /// so matching remains separate from platform detection.
-/// Missing or unsupported system preferences always resolve to English.
+/// Aify Pictures: missing or unsupported system preferences resolve to Spanish (the language of
+/// Aify's users), not English as in PhotoCraft.
 pub fn system_lang() -> Lang {
     #[cfg(test)]
     {
@@ -23,7 +24,25 @@ pub fn system_lang() -> Lang {
 }
 
 fn resolve(tags: &[String]) -> Lang {
-    tags.iter().find_map(|tag| lang_from_tag(tag)).unwrap_or(Lang::EN)
+    tags.iter().find_map(|tag| lang_from_tag(tag)).unwrap_or_else(default_lang)
+}
+
+/// The language when nothing better is known: Spanish (Aify Pictures). Tests keep PhotoCraft's
+/// English, which their expected texts are written in.
+pub fn default_lang() -> Lang {
+    if cfg!(test) { Lang::EN } else { Lang::from_code("es").unwrap_or(Lang::EN) }
+}
+
+/// Aify Pictures: the browser's `navigator.languages`, set once by the web app before it starts
+/// (`apps/photocraft-web`), because this crate has no access to the page.
+#[cfg(target_arch = "wasm32")]
+static WEB_TAGS: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
+
+/// Hand the browser's preferred languages to Auto. Only the first call counts.
+#[cfg(target_arch = "wasm32")]
+pub fn set_web_tags(tags: Vec<String>) {
+    let tags: Vec<String> = tags.into_iter().map(|t| t.trim().to_owned()).filter(|t| !t.is_empty() && t.len() <= 128).take(64).collect();
+    let _ = WEB_TAGS.set(tags);
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -54,7 +73,7 @@ fn detect_system_tags() -> Vec<String> {
 
 #[cfg(all(not(test), target_arch = "wasm32"))]
 fn detect_system_tags() -> Vec<String> {
-    Vec::new()
+    WEB_TAGS.get().cloned().unwrap_or_default()
 }
 
 #[cfg(test)]

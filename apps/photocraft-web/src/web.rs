@@ -46,6 +46,11 @@ type Served = Arc<Mutex<ServedFonts>>;
 
 pub fn start() {
     eframe::WebLogger::init(log::LevelFilter::Info).ok();
+    // Aify Pictures: the browser's languages decide Auto (Spanish when none is supported).
+    if let Some(window) = web_sys::window() {
+        let tags = window.navigator().languages().iter().filter_map(|v| v.as_string()).collect();
+        photocraft_ui_egui::i18n::set_web_tags(tags);
+    }
     wasm_bindgen_futures::spawn_local(async {
         let Some(document) = web_sys::window().and_then(|w| w.document()) else {
             log::error!("no document");

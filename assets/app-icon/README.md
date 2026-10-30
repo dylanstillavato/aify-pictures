@@ -1,7 +1,9 @@
 # Icono de Aify Pictures
 
-Un marco de foto blanco con un sol lima (`#D7FF3D`) y una montaña, sobre el azul de Aify
-(`#1D5FE0`). Teja de 512 unidades con `rx=112`, como el icono original de PhotoCraft, para que
+Sistema de logos de la familia Aify (opción C, 2026-10-30): cada app es una teja con su inicial
+en Super Jello, la tipografía de Aify. Aify Pictures es una «P» blanca sobre el azul de Aify
+(`#1D5FE0`) con un punto lima (`#D7FF3D`). La «P» va como trazado vectorial (sacado de la fuente),
+así que el SVG no necesita la tipografía instalada. Teja de 512 unidades con `rx=112`, como el icono original de PhotoCraft, para que
 encaje en las mismas plantillas de macOS, Windows y Linux.
 
 `photocraft.svg` es el original; `photocraft-1024.png` y `hicolor/` salen de él. Los nombres

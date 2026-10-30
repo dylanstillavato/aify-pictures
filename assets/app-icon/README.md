@@ -1,47 +1,10 @@
-# PhotoCraft app icon
+# Icono de Aify Pictures
 
-A **nine-tailed kitsune with a brow diamond**: an engraving portrait, seated, looking back at the
-viewer, in the Crafting Apps' owl-template framing (full-bleed field, head and body filling the
-tile, tails running off the edges).
+Un marco de foto blanco con un sol lima (`#D7FF3D`) y una montaña, sobre el azul de Aify
+(`#1D5FE0`). Teja de 512 unidades con `rx=112`, como el icono original de PhotoCraft, para que
+encaje en las mismas plantillas de macOS, Windows y Linux.
 
-## Palette
-
-Exactly three colours:
-
-| Colour | Hex | Used for |
-|---|---|---|
-| Ink | `#0b0b0c` | line work and contours |
-| Paper | `#efe9dc` | the figure |
-| PhotoCraft blue (app colour) | `#2f7bf5` | the full-bleed field |
-
-## Geometry
-
-A 512-unit tile (`viewBox="0 0 512 512"`), rounded square with `rx=112`, no border. The macOS
-renders pad it onto Apple's 824/1024 icon grid; the Windows and Linux renders use the whole tile,
-as the other Crafting Apps do.
-
-## Provenance
-
-The owner's original drawing, made in ArtCraft (2880 px, engraving style, keyed to the palette),
-vectorised with craftrules `assets/logo-options/_tools/vectorize_tile.py`. The source PNG stays in
-craftrules at `assets/app-icons/photocraft/source.png`. License: see `LICENSE.txt`.
-
-## Files
-
-- `photocraft.svg`: canonical master (traced at 2048 px).
-- `photocraft-small.svg`: lighter trace (traced at 1024 px); also the hicolor scalable icon.
-- `photocraft-1024.png`: 1024 px render on the macOS grid.
-- `photocraft.icns`: macOS bundle icon (`CFBundleIconFile`).
-- `photocraft.ico`: Windows icon, 16–256 px, embedded in the `.exe` by `apps/photocraft/build.rs`.
-- `hicolor/<size>/apps/ai.storyteller.photocraft.png` (16–512) and `hicolor/scalable/...svg`:
-  Linux icon theme.
-
-The app also sets the window icon and Wayland app ID at runtime (`apps/photocraft/src/app_icon.rs`,
-`main.rs`). On Windows the taskbar shows the icon of the Start Menu shortcut that launches the
-exe, so the MSI's `<Icon Id>` keeps the `.exe` extension (ICE50); `app_icon.rs` documents the
-details and tests the `.ico` sizes and the WiX icon references.
-
-## Regenerate
-
-Replace `photocraft.svg` (and `photocraft-small.svg`), then run `packaging/icons.sh`. It needs
-`resvg`, plus `iconutil` on macOS; the `.ico` is packed by `cargo xtask ico`.
+`photocraft.svg` es el original; `photocraft-1024.png` y `hicolor/` salen de él. Los nombres
+de archivo se mantienen para no tocar el código que los carga. `photocraft.ico` y
+`photocraft.icns` (solo escritorio) siguen siendo los de PhotoCraft hasta regenerarlos con
+`packaging/icons.sh`.

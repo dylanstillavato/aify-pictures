@@ -1,20 +1,21 @@
-//! Community and project links: the Help menu, the About dialog, the start screen and the title
-//! bar all open these. URLs follow the crafting-app pattern (`getartcraft.com/apps/<app>`,
-//! `github.com/storytold/<app>`).
+//! Enlaces de Aify Pictures: el menú Ayuda, «Acerca de» y la pantalla de inicio los abren.
+//! Aify Pictures se basa en PhotoCraft (MIT/Apache-2.0): el crédito enlaza a su repositorio.
+//! Los ids de comando (`help.discord`, `help.artcraftWebsite`…) se mantienen para no romper
+//! menús ni atajos guardados; solo cambian la URL y la etiqueta.
 
 use serde_json::{Value, json};
 
 use crate::PhotocraftApp;
 
-pub const DISCORD: &str = "https://discord.gg/artcraft";
-pub const ARTCRAFT_WEBSITE: &str = "https://getartcraft.com";
-pub const APP_PAGE: &str = "https://getartcraft.com/apps/photocraft";
+pub const AIFY: &str = "https://www.useaify.app";
+pub const CREDITOS: &str = "https://github.com/storytold/photocraft/blob/main/NOTICE";
+pub const APP_PAGE: &str = "https://pictures.useaify.app";
 pub const GITHUB: &str = "https://github.com/storytold/photocraft";
-pub const ISSUES: &str = "https://github.com/storytold/photocraft/issues";
+pub const ISSUES: &str = "https://www.instagram.com/use.aify/";
 
 /// Help-menu link commands: (id, url). Labels live in `menus::UI_COMMANDS`.
 pub const COMMANDS: &[(&str, &str)] =
-    &[("help.discord", DISCORD), ("help.website", APP_PAGE), ("help.artcraftWebsite", ARTCRAFT_WEBSITE), ("help.github", GITHUB), ("help.reportIssue", ISSUES)];
+    &[("help.discord", AIFY), ("help.website", APP_PAGE), ("help.artcraftWebsite", CREDITOS), ("help.github", GITHUB), ("help.reportIssue", ISSUES)];
 
 pub fn url_for(id: &str) -> Option<&'static str> {
     COMMANDS.iter().find(|c| c.0 == id).map(|c| c.1)
@@ -32,20 +33,20 @@ pub fn open(app: &mut PhotocraftApp, ctx: &egui::Context, url: &str) -> Value {
     json!({"url": url})
 }
 
-/// The prominent "Join us on Discord" button.
-pub fn discord_button(app: &mut PhotocraftApp, ui: &mut egui::Ui, min_width: f32) -> egui::Response {
-    let r = crate::widgets::primary_button(ui, tl!("Join us on Discord"), min_width).on_hover_text(DISCORD);
+/// El botón principal hacia Aify (programar lo que se crea).
+pub fn aify_button(app: &mut PhotocraftApp, ui: &mut egui::Ui, min_width: f32) -> egui::Response {
+    let r = crate::widgets::primary_button(ui, "Programa tus piezas en Aify", min_width).on_hover_text(AIFY);
     if r.clicked() {
-        open(app, ui.ctx(), DISCORD);
+        open(app, ui.ctx(), AIFY);
     }
     r
 }
 
-/// "PhotoCraft website · GitHub · ArtCraft" as links, centred. Clicks route through [`open`] (the
+/// «Aify Pictures · Aify · Basado en PhotoCraft» como enlaces, centrados. Clicks route through [`open`] (the
 /// platform browser service) rather than `ui.hyperlink_to`, which uses the unreliable `ctx.open_url`.
 pub fn link_row(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     let t = crate::theme::Tokens::get(ui.ctx());
-    let links = [(tl!("PhotoCraft website"), APP_PAGE), (tl!("GitHub"), GITHUB), (tl!("ArtCraft"), ARTCRAFT_WEBSITE)];
+    let links = [("Aify Pictures", APP_PAGE), ("Aify", AIFY), ("Basado en PhotoCraft", GITHUB)];
     let font = egui::FontId::proportional(12.5);
     let sep = "  ·  ";
     let width: f32 = links.iter().map(|(l, _)| ui.painter().layout_no_wrap((*l).into(), font.clone(), t.text).size().x).sum::<f32>()
@@ -94,8 +95,8 @@ mod tests {
             assert_eq!(opened.lock().unwrap().last().map(String::as_str), Some(*url), "{id}");
         }
         // The direct open() helper (Discord button / start-page links) also uses it.
-        open(&mut app, &ctx, DISCORD);
-        assert_eq!(opened.lock().unwrap().last().map(String::as_str), Some(DISCORD));
+        open(&mut app, &ctx, AIFY);
+        assert_eq!(opened.lock().unwrap().last().map(String::as_str), Some(AIFY));
     }
 
     #[test]
@@ -126,8 +127,8 @@ mod tests {
         let mut app = PhotocraftApp::new(photocraft_engine::Session::new(), Default::default());
         let ctx = egui::Context::default();
         for (id, url) in [
-            ("help.discord", "https://discord.gg/artcraft"),
-            ("help.website", "https://getartcraft.com/apps/photocraft"),
+            ("help.discord", "https://www.useaify.app"),
+            ("help.website", "https://pictures.useaify.app"),
             ("help.github", "https://github.com/storytold/photocraft"),
         ] {
             let r = crate::menus::invoke(&mut app, &ctx, id, serde_json::json!({})).unwrap();

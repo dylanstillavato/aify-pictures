@@ -90,13 +90,13 @@ pub const SHELL_COMMANDS: &[(&str, &str, &[&str], Option<&str>)] = &[
     ("window.theme.softLight", "Soft", &["Window", "Theme", "Light Theme"], None),
     ("window.theme.system", "Sync with system", &["Window", "Theme"], None),
     ("edit.search", "Search…", &["Edit"], Some("Cmd+F")),
-    ("help.discord", "Join the ArtCraft Discord…", &["Help"], None),
-    ("help.website", "PhotoCraft Website", &["Help"], None),
-    ("help.artcraftWebsite", "ArtCraft Website", &["Help"], None),
-    ("help.github", "PhotoCraft on GitHub", &["Help"], None),
-    ("help.reportIssue", "Report an Issue…", &["Help"], None),
+    ("help.discord", "Aify: programa tus piezas…", &["Help"], None),
+    ("help.website", "Web de Aify Pictures", &["Help"], None),
+    ("help.artcraftWebsite", "Licencias y créditos (PhotoCraft)", &["Help"], None),
+    ("help.github", "Basado en PhotoCraft (GitHub)", &["Help"], None),
+    ("help.reportIssue", "Cuéntanos un problema…", &["Help"], None),
     ("help.systemInfo", "System Info…", &["Help"], None),
-    ("help.about", "About PhotoCraft", &["Help"], None),
+    ("help.about", "Acerca de Aify Pictures", &["Help"], None),
 ];
 
 /// The tools, in toolbar order: shortcut id (`tools.select.<tool>`), Photoshop's name for it

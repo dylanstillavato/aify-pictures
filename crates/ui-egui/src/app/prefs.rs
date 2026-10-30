@@ -31,6 +31,12 @@ impl PhotocraftApp {
         }
     }
 
+    /// Show the theme the loaded preferences select (their appearance mode and its light or
+    /// dark theme) without changing them, whatever palette the context was set up with.
+    pub fn apply_saved_theme(&mut self, ctx: &egui::Context) {
+        crate::prefs_ui::apply_saved_theme(self, ctx);
+    }
+
     pub(crate) fn apply_theme(&mut self, ctx: &egui::Context, kind: theme::ThemeKind) {
         // Color and Swatches trade indices between Pro and Studio layouts.
         if let Some(selected) = dock::Group::Color.tabs(theme::Tokens::for_kind(self.ui.theme).pro).get(self.ui.dock_tabs.color)

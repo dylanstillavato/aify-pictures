@@ -111,6 +111,8 @@ pub(super) fn choice_label(v: &str) -> String {
         "ahd" => "AHD (adaptive homogeneity)".into(),
         "mhc" => "Malvar–He–Cutler".into(),
         "cpu" => "CPU (no GPU acceleration)".into(),
+        // "Aify" alone also names the app's own menu; the swatch says which family it is in.
+        "aify" => "Aify dark".into(),
         v => humanize(v),
     }
 }

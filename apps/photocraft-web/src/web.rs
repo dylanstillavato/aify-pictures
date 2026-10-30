@@ -86,7 +86,7 @@ pub fn start() {
                 options,
                 Box::new(move |cc| {
                     PhotocraftApp::install_type_reset_hooks(&cc.egui_ctx);
-                    PhotocraftApp::setup_context(&cc.egui_ctx, ThemeKind::Pro);
+                    PhotocraftApp::setup_context(&cc.egui_ctx, DEFAULT_THEME);
                     let inbox: Inbox = Arc::default();
                     let place_inbox: Inbox = Arc::default();
                     let served: Served = Arc::default();
@@ -99,7 +99,7 @@ pub fn start() {
                         photocraft_ui_egui::notices::post(&mut app, i18n::t("Some brush presets could not be loaded"), preset_warnings, true, None);
                     }
                     listen_pen(&pen_target, app.stylus.feed.clone());
-                    app.set_theme(&cc.egui_ctx, ThemeKind::Pro);
+                    startup_theme(&mut app, &cc.egui_ctx);
                     if let Some(rs) = cc.wgpu_render_state.clone()
                         && !force_cpu
                     {
@@ -475,6 +475,35 @@ fn services(inbox: Inbox, place_inbox: Inbox, cursor_pos: photocraft_ui_egui::Cu
 }
 
 const PREFS_KEY: &str = "photocraft.preferences";
+
+/// The theme Aify Pictures opens in on the web.
+const DEFAULT_THEME: ThemeKind = ThemeKind::Aify;
+
+/// Set once the saved theme has been looked at by [`startup_theme`].
+const THEME_DEFAULT_KEY: &str = "aify.pictures.themeDefault";
+
+/// Open in [`DEFAULT_THEME`] unless the user chose a theme. Until this default existed every
+/// launch forced the Pro theme and saved it, so a saved Dark mode with Pro is that old default
+/// rather than a choice: it moves to the new default once, and is kept from then on.
+fn startup_theme(app: &mut PhotocraftApp, ctx: &egui::Context) {
+    use photocraft_engine::prefs::{AppearanceMode, DarkTheme};
+    let storage = local_storage();
+    let item = |key: &str| storage.as_ref().and_then(|s| s.get_item(key).ok().flatten());
+    let saved = item(PREFS_KEY).is_some();
+    let looked = item(THEME_DEFAULT_KEY).is_some();
+    let interface = &app.session.prefs().interface;
+    let old_default = interface.appearance_mode == AppearanceMode::Dark && interface.dark_theme == DarkTheme::Pro;
+    if !saved || (!looked && old_default) {
+        app.set_theme(ctx, DEFAULT_THEME);
+    } else {
+        app.apply_saved_theme(ctx);
+    }
+    if let Some(storage) = storage
+        && let Err(e) = storage.set_item(THEME_DEFAULT_KEY, "1")
+    {
+        log::warn!("photocraft-web: could not remember the theme default: {e:?}");
+    }
+}
 
 fn local_storage() -> Option<web_sys::Storage> {
     web_sys::window()?.local_storage().ok().flatten()

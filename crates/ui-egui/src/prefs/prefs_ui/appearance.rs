@@ -46,6 +46,7 @@ pub(super) fn selected_theme(interface: &prefs::Interface, system: Option<egui::
             LightTheme::Adwaita => ThemeKind::Adwaita,
             LightTheme::BreezeLight => ThemeKind::BreezeLight,
             LightTheme::SoftLight => ThemeKind::SoftLight,
+            LightTheme::Retro => ThemeKind::Retro,
         }
     } else {
         match interface.dark_theme {
@@ -56,6 +57,7 @@ pub(super) fn selected_theme(interface: &prefs::Interface, system: Option<egui::
             DarkTheme::AdwaitaDark => ThemeKind::AdwaitaDark,
             DarkTheme::BreezeDark => ThemeKind::BreezeDark,
             DarkTheme::SoftDark => ThemeKind::SoftDark,
+            DarkTheme::Aify => ThemeKind::Aify,
         }
     }
 }
@@ -104,6 +106,7 @@ pub(super) const LIGHT_THEME_OPTIONS: &[(&str, ThemeKind)] = &[
     ("adwaita", ThemeKind::Adwaita),
     ("breezeLight", ThemeKind::BreezeLight),
     ("softLight", ThemeKind::SoftLight),
+    ("retro", ThemeKind::Retro),
 ];
 
 pub(super) const DARK_THEME_OPTIONS: &[(&str, ThemeKind)] = &[
@@ -114,6 +117,7 @@ pub(super) const DARK_THEME_OPTIONS: &[(&str, ThemeKind)] = &[
     ("adwaitaDark", ThemeKind::AdwaitaDark),
     ("breezeDark", ThemeKind::BreezeDark),
     ("softDark", ThemeKind::SoftDark),
+    ("aify", ThemeKind::Aify),
 ];
 
 pub(super) fn favorite_theme_groups(favorites: &[SavedTheme]) -> (Vec<ThemeKind>, Vec<ThemeKind>) {
@@ -198,6 +202,13 @@ pub(super) fn sync_animations(app: &PhotocraftApp, ctx: &egui::Context) {
             s.scroll_animation = scroll;
         });
     }
+}
+
+/// Show the theme the saved preferences select, even when the context was set up with another
+/// palette (a shell that sets up its context before loading preferences), without changing them.
+pub(crate) fn apply_saved_theme(app: &mut PhotocraftApp, ctx: &egui::Context) {
+    let selected = selected_theme(&app.session.prefs().interface, system_theme(app, ctx));
+    app.apply_theme(ctx, selected);
 }
 
 /// Resolve the saved appearance mode without changing it or either theme slot.

@@ -194,6 +194,8 @@ fn breeze_themes_are_chosen_by_preference_and_fix_the_matching_mode() {
         ("breezeDark", ThemeKind::BreezeDark, AppearanceMode::Dark),
         ("softLight", ThemeKind::SoftLight, AppearanceMode::Light),
         ("softDark", ThemeKind::SoftDark, AppearanceMode::Dark),
+        ("retro", ThemeKind::Retro, AppearanceMode::Light),
+        ("aify", ThemeKind::Aify, AppearanceMode::Dark),
     ] {
         app.run("prefs.set", json!({"path": "interface.theme", "value": id})).unwrap();
         tick(&mut app, &ctx);
@@ -203,8 +205,8 @@ fn breeze_themes_are_chosen_by_preference_and_fix_the_matching_mode() {
         assert_eq!(app.ui.theme, kind, "{id}");
     }
     // The two slots are independent: choosing the dark one left the light choice alone.
-    assert_eq!(app.session.prefs().interface.light_theme, LightTheme::SoftLight);
-    assert_eq!(app.session.prefs().interface.dark_theme, DarkTheme::SoftDark);
+    assert_eq!(app.session.prefs().interface.light_theme, LightTheme::Retro);
+    assert_eq!(app.session.prefs().interface.dark_theme, DarkTheme::Aify);
 }
 
 #[test]

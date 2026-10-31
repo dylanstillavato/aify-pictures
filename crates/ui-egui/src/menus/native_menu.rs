@@ -28,7 +28,7 @@ use crate::PhotocraftApp;
 use crate::i18n::{Lang, tr, tr_id};
 use crate::menus::MenuItem;
 
-pub const APP_NAME: &str = "Aify Pictures";
+pub const APP_NAME: &str = "@Pictures";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct MenuBar {

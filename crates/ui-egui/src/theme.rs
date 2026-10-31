@@ -13,7 +13,7 @@
 //!   (blue-grey surfaces, Breeze blue accent, 5 px corners), so the app sits with the rest of a
 //!   Plasma desktop.
 //!
-//! - **Aify**: Aify Pictures' own dark look (the web build's default). Near-black graphite cards
+//! - **Aify**: @Pictures' own dark look (the web build's default). Near-black graphite cards
 //!   floating apart on an even darker base, very round corners, pill tabs, Aify blue (#1D5FE0)
 //!   for actions and lime (#D7FF3D) for what is selected or active.
 //! - **Retro**: a tribute to the black-and-white desktop editors of 1990, our own design: 1-bit
@@ -59,7 +59,7 @@ pub enum ThemeKind {
     SoftDark,
     /// A low-contrast light theme: pale violet-grey surfaces, softened dark text and a periwinkle accent.
     SoftLight,
-    /// Aify Pictures' own dark theme: floating graphite cards, very round corners, Aify blue
+    /// @Pictures' own dark theme: floating graphite cards, very round corners, Aify blue
     /// actions and a lime highlight for what is selected or active (the web build's default).
     Aify,
     /// A light 1-bit tribute to the black-and-white desktop editors of 1990: white panels with

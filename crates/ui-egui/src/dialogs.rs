@@ -770,7 +770,7 @@ fn about_tab_body(app: &mut PhotocraftApp, ui: &mut egui::Ui, tab: &str) {
         "contributors" => crate::credits::contributors_ui(app, ui),
         "models" => crate::credits::models_ui(ui),
         _ => {
-            ui.label("Aify Pictures: el editor de imágenes gratis para gestores de redes, de Aify.");
+            ui.label("@Pictures: el editor de imágenes gratis para gestores de redes, de Aify.");
             ui.label("Basado en PhotoCraft (MIT o Apache-2.0), del ArtCraft Team y la comunidad de PhotoCraft.");
             ui.label(crate::i18n::fmt(tl!("Version {version}"), &[("version", &photocraft_engine::build_info::long_version())]));
             ui.add_space(12.0);

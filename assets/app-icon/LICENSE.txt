@@ -1,4 +1,4 @@
-Icono de Aify Pictures (photocraft.svg, photocraft-small.svg, photocraft-1024.png y hicolor/).
+Icono de @Pictures (photocraft.svg, photocraft-small.svg, photocraft-1024.png y hicolor/).
 
 Obra original de Aify para este fork. Con la misma licencia que el resto del proyecto, a elegir:
 

@@ -11,7 +11,7 @@ use photocraft_doc::Document;
 use photocraft_ui_egui::i18n;
 use photocraft_ui_egui::served_fonts;
 use photocraft_ui_egui::theme::ThemeKind;
-use photocraft_ui_egui::{FileDialogAnswer, FileDialogRequest, PhotocraftApp, Services};
+use photocraft_ui_egui::{FileDialogAnswer, FileDialogRequest, PhotocraftApp, Services, Tool};
 use wasm_bindgen::JsCast as _;
 
 type Inbox = Arc<Mutex<Vec<(String, Vec<u8>)>>>;
@@ -91,6 +91,7 @@ pub fn start() {
                     let place_inbox: Inbox = Arc::default();
                     let served: Served = Arc::default();
                     load_font_manifest(served.clone(), cc.egui_ctx.clone());
+                    iniciar_fuentes_locales(served.clone(), cc.egui_ctx.clone());
                     let (session, warnings) = crate::preset_bridge::session(presets.clone());
                     preset_warnings.extend(warnings);
                     let drag = listen_drag(&pen_target);
@@ -237,6 +238,37 @@ fn load_font_manifest(served: Served, ctx: egui::Context) {
     });
 }
 
+/// Aify: las fuentes instaladas. Con permiso ya dado, se cargan ahora; si no se ha preguntado,
+/// se pregunta al elegir una herramienta de texto (`WebShell::logic`).
+fn iniciar_fuentes_locales(served: Served, ctx: egui::Context) {
+    use crate::fuentes_locales::{PEDIR_CON_TEXTO, Permiso, permiso};
+    wasm_bindgen_futures::spawn_local(async move {
+        match permiso().await {
+            Permiso::Concedido => registrar_fuentes_locales(served, ctx).await,
+            Permiso::Preguntar => PEDIR_CON_TEXTO.store(true, Ordering::Relaxed),
+            Permiso::NoDisponible | Permiso::Denegado => {}
+        }
+    });
+}
+
+/// Pide las fuentes instaladas y las pone en los menús de fuentes (se leen al elegirlas).
+async fn registrar_fuentes_locales(served: Served, ctx: egui::Context) {
+    match crate::fuentes_locales::cargar().await {
+        Ok(fuentes) => {
+            {
+                let mut s = served.lock().unwrap_or_else(PoisonError::into_inner);
+                for f in &fuentes {
+                    s.files.entry(f.family.clone()).or_default().push((f.file.clone(), None));
+                }
+            }
+            log::info!("photocraft-web: {} fuentes instaladas", fuentes.len());
+            served_fonts::add_fonts(&fuentes);
+            ctx.request_repaint();
+        }
+        Err(e) => log::warn!("no se pudieron usar las fuentes instaladas: {e}"),
+    }
+}
+
 /// The browser's preferred languages (`navigator.languages`, e.g. `["ar-EG", "en"]`).
 fn browser_languages() -> Vec<String> {
     web_sys::window().map(|w| w.navigator().languages().iter().filter_map(|l| l.as_string()).collect()).unwrap_or_default()
@@ -327,7 +359,12 @@ impl WebShell {
             let served = self.served.clone();
             let ctx = ctx.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                match fetch_bytes(&file, integrity.as_deref()).await {
+                let leido = if file.starts_with(crate::fuentes_locales::PREFIJO) {
+                    crate::fuentes_locales::leer(&file).await
+                } else {
+                    fetch_bytes(&file, integrity.as_deref()).await
+                };
+                match leido {
                     Ok(bytes) => {
                         served.lock().unwrap_or_else(PoisonError::into_inner).arrived.push((family, bytes));
                         ctx.request_repaint();
@@ -375,6 +412,14 @@ impl eframe::App for WebShell {
                     }
                 }
             });
+        }
+        // Aify: el permiso de las fuentes instaladas se pide al elegir Texto (un clic o la tecla T
+        // acaban de pasar, y el navegador solo pregunta tras un gesto del usuario).
+        if crate::fuentes_locales::PEDIR_CON_TEXTO.load(Ordering::Relaxed)
+            && matches!(self.app.active_tool(), Tool::Type | Tool::VerticalType | Tool::HorizontalTypeMask | Tool::VerticalTypeMask)
+        {
+            crate::fuentes_locales::PEDIR_CON_TEXTO.store(false, Ordering::Relaxed);
+            wasm_bindgen_futures::spawn_local(registrar_fuentes_locales(self.served.clone(), ctx.clone()));
         }
         self.serve_fonts(ctx);
         self.app.logic_frame(ctx, frame);

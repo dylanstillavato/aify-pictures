@@ -46,7 +46,7 @@ type Served = Arc<Mutex<ServedFonts>>;
 
 pub fn start() {
     eframe::WebLogger::init(log::LevelFilter::Info).ok();
-    // Aify Pictures: the browser's languages decide Auto (Spanish when none is supported).
+    // @Pictures: the browser's languages decide Auto (Spanish when none is supported).
     if let Some(window) = web_sys::window() {
         let tags = window.navigator().languages().iter().filter_map(|v| v.as_string()).collect();
         photocraft_ui_egui::i18n::set_web_tags(tags);
@@ -476,7 +476,7 @@ fn services(inbox: Inbox, place_inbox: Inbox, cursor_pos: photocraft_ui_egui::Cu
 
 const PREFS_KEY: &str = "photocraft.preferences";
 
-/// The theme Aify Pictures opens in on the web.
+/// The theme @Pictures opens in on the web.
 const DEFAULT_THEME: ThemeKind = ThemeKind::Aify;
 
 /// Set once the saved theme has been looked at by [`startup_theme`].

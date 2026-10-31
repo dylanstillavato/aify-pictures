@@ -1,5 +1,5 @@
-//! Enlaces de Aify Pictures: el menú Ayuda, «Acerca de» y la pantalla de inicio los abren.
-//! Aify Pictures se basa en PhotoCraft (MIT/Apache-2.0): el crédito enlaza a su repositorio.
+//! Enlaces de @Pictures: el menú Ayuda, «Acerca de» y la pantalla de inicio los abren.
+//! @Pictures se basa en PhotoCraft (MIT/Apache-2.0): el crédito enlaza a su repositorio.
 //! Los ids de comando (`help.discord`, `help.artcraftWebsite`…) se mantienen para no romper
 //! menús ni atajos guardados; solo cambian la URL y la etiqueta.
 
@@ -42,11 +42,11 @@ pub fn aify_button(app: &mut PhotocraftApp, ui: &mut egui::Ui, min_width: f32) -
     r
 }
 
-/// «Aify Pictures · Aify · Basado en PhotoCraft» como enlaces, centrados. Clicks route through [`open`] (the
+/// «@Pictures · Aify · Basado en PhotoCraft» como enlaces, centrados. Clicks route through [`open`] (the
 /// platform browser service) rather than `ui.hyperlink_to`, which uses the unreliable `ctx.open_url`.
 pub fn link_row(app: &mut PhotocraftApp, ui: &mut egui::Ui) {
     let t = crate::theme::Tokens::get(ui.ctx());
-    let links = [("Aify Pictures", APP_PAGE), ("Aify", AIFY), ("Basado en PhotoCraft", GITHUB)];
+    let links = [("@Pictures", APP_PAGE), ("Aify", AIFY), ("Basado en PhotoCraft", GITHUB)];
     let font = egui::FontId::proportional(12.5);
     let sep = "  ·  ";
     let width: f32 = links.iter().map(|(l, _)| ui.painter().layout_no_wrap((*l).into(), font.clone(), t.text).size().x).sum::<f32>()

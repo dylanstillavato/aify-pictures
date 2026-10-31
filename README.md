@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/app-icon/hicolor/256x256/apps/ai.storyteller.photocraft.png" width="112" height="112" alt="Icono de Aify Pictures">
+  <img src="assets/app-icon/hicolor/256x256/apps/ai.storyteller.photocraft.png" width="112" height="112" alt="Icono de @Pictures">
 </p>
 
-<h1 align="center">Aify Pictures</h1>
+<h1 align="center">@Pictures</h1>
 
 <p align="center">
   <b>El editor de imágenes gratis y de código abierto para gestores de redes.</b><br>
@@ -12,7 +12,7 @@
 
 ## De dónde sale
 
-Aify Pictures es un **fork de [PhotoCraft](https://github.com/storytold/photocraft)**, el editor de
+@Pictures es un **fork de [PhotoCraft](https://github.com/storytold/photocraft)**, el editor de
 código abierto escrito desde cero en Rust del ArtCraft Team y su comunidad. Partimos de su trabajo
 (licencia MIT o Apache-2.0) y lo vamos mejorando para quien crea contenido para redes:
 
@@ -40,12 +40,12 @@ cd apps/photocraft-web && trunk serve
 
 ## Licencia y créditos
 
-Como PhotoCraft, Aify Pictures tiene licencia [MIT](LICENSE-MIT) o [Apache-2.0](LICENSE-APACHE), a
+Como PhotoCraft, @Pictures tiene licencia [MIT](LICENSE-MIT) o [Apache-2.0](LICENSE-APACHE), a
 elegir. Los avisos obligatorios están en [NOTICE](NOTICE) y las fuentes, iconos y demás recursos de
 terceros, con su autor y su licencia, en [ATTRIBUTION.md](ATTRIBUTION.md).
 
-PhotoCraft es obra del ArtCraft Team y de los colaboradores de PhotoCraft. Aify Pictures es un
+PhotoCraft es obra del ArtCraft Team y de los colaboradores de PhotoCraft. @Pictures es un
 proyecto independiente: no está respaldado por ArtCraft, y el nombre y los logotipos de ArtCraft se
 han retirado de este fork, como piden sus condiciones.
 
-<sub>Adobe y Photoshop son marcas de Adobe Inc. Aify Pictures no está afiliado a Adobe ni respaldado por Adobe.</sub>
+<sub>Adobe y Photoshop son marcas de Adobe Inc. @Pictures no está afiliado a Adobe ni respaldado por Adobe.</sub>

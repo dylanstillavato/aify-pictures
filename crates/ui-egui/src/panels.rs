@@ -166,12 +166,12 @@ mod title_tests {
     fn window_title_follows_the_active_file() {
         let mut app = app(true);
         open_named(&mut app, "foo.psd");
-        assert_eq!(window_title(&app), "foo.psd \u{2014} PhotoCraft");
+        assert_eq!(window_title(&app), "foo.psd \u{2014} @Pictures");
         // Unsaved changes gain a `*` prefix, like the `•` in the app-drawn title.
         if let Some(st) = app.session.active_mut() {
             st.revision += 1;
         }
-        assert_eq!(window_title(&app), "*foo.psd \u{2014} PhotoCraft");
+        assert_eq!(window_title(&app), "*foo.psd \u{2014} @Pictures");
     }
 
     #[test]
@@ -183,7 +183,7 @@ mod title_tests {
         if let Some(st) = app.session.active_mut() {
             st.revision += 1;
         }
-        assert_eq!(window_title(&app), "*PhotoCraft");
+        assert_eq!(window_title(&app), "*@Pictures");
     }
 
     #[test]
@@ -256,7 +256,7 @@ mod title_tests {
         assert!(!cmds.iter().any(|c| matches!(c, egui::ViewportCommand::Title(_))), "repeat Title: {cmds:?}");
         open_named(&mut app, "foo.psd");
         super::sync_window_title(&mut app, &ctx);
-        assert_eq!(app.last_window_title, "foo.psd \u{2014} PhotoCraft");
+        assert_eq!(app.last_window_title, "foo.psd \u{2014} @Pictures");
     }
 }
 

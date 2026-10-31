@@ -44,6 +44,16 @@ fn query_local_fonts() -> Option<Function> {
     Reflect::get(&w, &"queryLocalFonts".into()).ok()?.dyn_into().ok()
 }
 
+/// ¿Acaba de haber un gesto del usuario (clic, tecla)? Sin él, el navegador no deja preguntar.
+pub fn hay_gesto() -> bool {
+    web_sys::window()
+        .and_then(|w| Reflect::get(&w.navigator(), &"userActivation".into()).ok())
+        .filter(|a| !a.is_undefined())
+        .and_then(|a| Reflect::get(&a, &"isActive".into()).ok())
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+}
+
 /// El permiso «local-fonts» sin preguntar nada.
 pub async fn permiso() -> Permiso {
     if query_local_fonts().is_none() {

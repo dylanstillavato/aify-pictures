@@ -413,10 +413,12 @@ impl eframe::App for WebShell {
                 }
             });
         }
-        // Aify: el permiso de las fuentes instaladas se pide al elegir Texto (un clic o la tecla T
-        // acaban de pasar, y el navegador solo pregunta tras un gesto del usuario).
+        // Aify: el permiso de las fuentes instaladas se pide con la herramienta Texto elegida y un
+        // gesto reciente del usuario (un clic o una tecla): sin gesto, el navegador no pregunta. Si
+        // el editor abre ya con Texto, se espera al primer clic o tecla.
         if crate::fuentes_locales::PEDIR_CON_TEXTO.load(Ordering::Relaxed)
             && matches!(self.app.active_tool(), Tool::Type | Tool::VerticalType | Tool::HorizontalTypeMask | Tool::VerticalTypeMask)
+            && crate::fuentes_locales::hay_gesto()
         {
             crate::fuentes_locales::PEDIR_CON_TEXTO.store(false, Ordering::Relaxed);
             wasm_bindgen_futures::spawn_local(registrar_fuentes_locales(self.served.clone(), ctx.clone()));

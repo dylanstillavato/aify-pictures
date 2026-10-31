@@ -29,6 +29,9 @@ mod web;
 mod fuentes_locales;
 
 #[cfg(target_arch = "wasm32")]
+mod puente_studio;
+
+#[cfg(target_arch = "wasm32")]
 fn main() {
     web::start();
 }

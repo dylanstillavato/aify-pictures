@@ -92,6 +92,17 @@ pub fn start() {
                     let served: Served = Arc::default();
                     load_font_manifest(served.clone(), cc.egui_ctx.clone());
                     iniciar_fuentes_locales(served.clone(), cc.egui_ctx.clone());
+                    {
+                        // Aify: las imágenes que manda la pizarra de @Studio se abren como si se soltaran aquí.
+                        let (cola, ctx_abrir, ctx_pedir) = (inbox.clone(), cc.egui_ctx.clone(), cc.egui_ctx.clone());
+                        crate::puente_studio::iniciar(
+                            move |nombre, bytes| {
+                                cola.lock().unwrap_or_else(PoisonError::into_inner).push((nombre, bytes));
+                                ctx_abrir.request_repaint();
+                            },
+                            move || ctx_pedir.request_repaint(),
+                        );
+                    }
                     let (session, warnings) = crate::preset_bridge::session(presets.clone());
                     preset_warnings.extend(warnings);
                     let drag = listen_drag(&pen_target);
@@ -424,6 +435,7 @@ impl eframe::App for WebShell {
             wasm_bindgen_futures::spawn_local(registrar_fuentes_locales(self.served.clone(), ctx.clone()));
         }
         self.serve_fonts(ctx);
+        crate::puente_studio::atender(&self.app);
         self.app.logic_frame(ctx, frame);
         self.save_presets(ctx);
         self.app.finish_type_reset_logic(ctx);

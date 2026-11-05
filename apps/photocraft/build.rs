@@ -21,10 +21,10 @@ fn main() {
     }
     let mut res = winresource::WindowsResource::new();
     res.set_icon("../../assets/app-icon/photocraft.ico")
-        .set("ProductName", "PhotoCraft")
-        .set("FileDescription", "PhotoCraft image editor")
-        .set("CompanyName", "Learning Machines LLC")
-        .set("LegalCopyright", "Copyright (c) the PhotoCraft authors. MIT OR Apache-2.0.")
+        .set("ProductName", "@Pictures")
+        .set("FileDescription", "@Pictures, editor de imágenes de Aify")
+        .set("CompanyName", "Aify")
+        .set("LegalCopyright", "@Pictures, de Aify. Basado en PhotoCraft (c) the PhotoCraft authors. MIT OR Apache-2.0.")
         .set("OriginalFilename", "photocraft.exe")
         .set("InternalName", "photocraft");
     if let Err(e) = res.compile() {

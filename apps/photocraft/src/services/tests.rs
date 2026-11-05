@@ -182,8 +182,9 @@ fn open_filters_keep_literal_extensions_on_windows_and_macos() {
 }
 
 #[test]
-fn native_services_provide_update_transport() {
-    assert!(native(None).check_updates.is_some());
+fn native_services_have_no_update_check() {
+    // @Pictures: PhotoCraft's update check would offer PhotoCraft itself, so it is off.
+    assert!(native(None).check_updates.is_none());
 }
 
 #[test]

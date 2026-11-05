@@ -5,7 +5,7 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key>
-  <string>en</string>
+  <string>es</string>
   <!-- UI translations are embedded in Rust; declare them for AppKit's system dialogs.
        Keep in sync with LANGUAGES in crates/ui-egui/src/i18n/mod.rs. -->
   <key>CFBundleLocalizations</key>
@@ -37,13 +37,13 @@
     <string>nb</string>
   </array>
   <key>CFBundleDisplayName</key>
-  <string>PhotoCraft</string>
+  <string>@Pictures</string>
   <key>CFBundleName</key>
-  <string>PhotoCraft</string>
+  <string>@Pictures</string>
   <key>CFBundleExecutable</key>
-  <string>PhotoCraft</string>
+  <string>@Pictures</string>
   <key>CFBundleIdentifier</key>
-  <string>ai.storyteller.photocraft</string>
+  <string>app.useaify.pictures</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundlePackageType</key>
@@ -59,7 +59,7 @@
   <key>PhotoCraftBuildCommit</key>
   <string>@BUILD_SHA@</string>
   <key>CFBundleIconFile</key>
-  <string>PhotoCraft</string>
+  <string>AppIcon</string>
   <key>LSApplicationCategoryType</key>
   <string>public.app-category.graphics-design</string>
   <!-- Must match MACOSX_DEPLOYMENT_TARGET in package.sh. Big Sur is the first release on
@@ -73,7 +73,7 @@
   <key>NSRequiresAquaSystemAppearance</key>
   <false/>
   <key>NSHumanReadableCopyright</key>
-  <string>Copyright © the PhotoCraft authors. MIT OR Apache-2.0.</string>
+  <string>@Pictures, de Aify. Basado en PhotoCraft (© the PhotoCraft authors). MIT OR Apache-2.0.</string>
 
   <!-- PhotoCraft's own format. -->
   <key>UTExportedTypeDeclarations</key>
@@ -89,7 +89,7 @@
         <string>public.image</string>
       </array>
       <key>UTTypeIconFile</key>
-      <string>PhotoCraft</string>
+      <string>AppIcon</string>
       <key>UTTypeTagSpecification</key>
       <dict>
         <key>public.filename-extension</key>
@@ -191,7 +191,7 @@
       <key>LSHandlerRank</key>
       <string>Owner</string>
       <key>CFBundleTypeIconFile</key>
-      <string>PhotoCraft</string>
+      <string>AppIcon</string>
       <key>LSItemContentTypes</key>
       <array><string>ai.storyteller.photocraft.document</string></array>
     </dict>

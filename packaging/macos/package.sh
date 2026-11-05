@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Build, sign and (optionally) notarize the macOS release artifacts:
 #
-#   $DIST/photocraft-<version>-macos-<arch>.dmg          PhotoCraft.app on a drag-to-Applications DMG
-#   $DIST/photocraft-cli-<version>-macos-<arch>.zip      the headless CLI
+#   $DIST/aify-pictures-<version>-macos-<arch>.dmg       @Pictures.app on a drag-to-Applications DMG
+#   $DIST/aify-pictures-cli-<version>-macos-<arch>.zip   the headless CLI
+#
+# @Pictures (Aify's fork of PhotoCraft): the app is branded @Pictures, and the DMG has no custom
+# Finder background (PhotoCraft's carried its name), just the app and an Applications link.
 #
 # Usage: packaging/macos/package.sh [--arch universal|aarch64|x86_64] [--skip-build]
 #
@@ -39,9 +42,9 @@ export MACOSX_DEPLOYMENT_TARGET=11.0
 IDENTITY="${MACOS_SIGN_IDENTITY:--}"
 SHORT_VERSION="${VERSION%%-*}"
 WORK="$CARGO_TARGET_DIR/macos-package"
-APP="$WORK/PhotoCraft.app"
-DMG="$DIST/photocraft-$VERSION-macos-$ARCH.dmg"
-CLI_ZIP="$DIST/photocraft-cli-$VERSION-macos-$ARCH.zip"
+APP="$WORK/@Pictures.app"
+DMG="$DIST/aify-pictures-$VERSION-macos-$ARCH.dmg"
+CLI_ZIP="$DIST/aify-pictures-cli-$VERSION-macos-$ARCH.zip"
 
 NOTARIZE=0
 if [[ "$IDENTITY" = "-" ]]; then
@@ -52,7 +55,7 @@ else
   warn "macOS: APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID incomplete; signed but not notarized"
 fi
 
-echo "==> PhotoCraft $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $NOTARIZE"
+echo "==> @Pictures $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $NOTARIZE"
 
 # ---- build -------------------------------------------------------------------------------------
 if [[ "$SKIP_BUILD" = 0 ]]; then
@@ -115,13 +118,13 @@ staple() {
   done
 }
 
-# ---- PhotoCraft.app ----------------------------------------------------------------------------
+# ---- @Pictures.app ------------------------------------------------------------------------------
 echo "==> assembling $APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Executable and icon carry the display name (CFBundleExecutable / CFBundleIconFile).
-cp "$WORK/bin/photocraft" "$APP/Contents/MacOS/PhotoCraft"
+cp "$WORK/bin/photocraft" "$APP/Contents/MacOS/@Pictures"
 cp "$WORK/bin/photocraft-cli" "$APP/Contents/MacOS/photocraft-cli"
-cp "$ROOT/assets/app-icon/photocraft.icns" "$APP/Contents/Resources/PhotoCraft.icns"
+cp "$ROOT/assets/app-icon/photocraft.icns" "$APP/Contents/Resources/AppIcon.icns"
 # Notices for the bundled font fallback, included before the bundle is signed.
 cp "$ROOT/NOTICE" "$ROOT/ATTRIBUTION.md" "$APP/Contents/Resources/"
 # Licences of the embedded craft-fonts fonts (only when built with CRAFT_FONTS_DIR).
@@ -137,14 +140,14 @@ printf 'APPL????' >"$APP/Contents/PkgInfo"
 
 # Sign inside-out: nested code first, then the bundle itself (no --deep on the final signature).
 # The bundled CLI is nested executable code; sign it before sealing the app bundle.
-sign --options runtime --identifier ai.storyteller.photocraft-cli "$APP/Contents/MacOS/photocraft-cli"
-sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP/Contents/MacOS/PhotoCraft"
+sign --options runtime --identifier app.useaify.pictures-cli "$APP/Contents/MacOS/photocraft-cli"
+sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP/Contents/MacOS/@Pictures"
 sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP"
 codesign --verify --strict --deep --verbose=2 "$APP"
 
 if [[ "$NOTARIZE" = 1 ]]; then
-  ditto -c -k --keepParent "$APP" "$WORK/PhotoCraft-notarize.zip"
-  notarize "$WORK/PhotoCraft-notarize.zip"
+  ditto -c -k --keepParent "$APP" "$WORK/Pictures-notarize.zip"
+  notarize "$WORK/Pictures-notarize.zip"
   staple "$APP"
   spctl --assess --type execute -vvv "$APP"
 fi
@@ -153,17 +156,12 @@ fi
 echo "==> building $DMG"
 STAGE="$WORK/dmg"
 mkdir -p "$STAGE"
-ditto "$APP" "$STAGE/PhotoCraft.app"
+ditto "$APP" "$STAGE/@Pictures.app"
 ln -s /Applications "$STAGE/Applications"
-# Finder window layout: background, icon size and positions (packaging/macos/dmg/README.md).
-mkdir -p "$STAGE/.background"
-cp "$HERE/dmg/background.tiff" "$STAGE/.background/background.tiff"
-cp "$HERE/dmg/dmg-layout.DS_Store" "$STAGE/.DS_Store"
 rm -f "$DMG" "$WORK/raw.dmg"
 # makehybrid + convert builds the image without attaching a device, unlike `create -srcfolder`,
 # which is flaky on CI runners ("Resource busy") and hangs in sandboxed sessions.
-# The volume name has no version: .DS_Store finds the background through an alias that includes it.
-hdiutil makehybrid -hfs -hfs-volume-name "PhotoCraft" -hfs-openfolder "$STAGE" -o "$WORK/raw.dmg" "$STAGE"
+hdiutil makehybrid -hfs -hfs-volume-name "@Pictures" -hfs-openfolder "$STAGE" -o "$WORK/raw.dmg" "$STAGE"
 hdiutil convert "$WORK/raw.dmg" -format UDZO -imagekey zlib-level=9 -o "$DMG"
 rm -f "$WORK/raw.dmg"
 sign "$DMG"
@@ -176,13 +174,13 @@ fi
 
 # ---- CLI ---------------------------------------------------------------------------------------
 echo "==> building $CLI_ZIP"
-CLI_DIR="$WORK/photocraft-cli-$VERSION-macos-$ARCH"
+CLI_DIR="$WORK/aify-pictures-cli-$VERSION-macos-$ARCH"
 mkdir -p "$CLI_DIR"
 cp "$WORK/bin/photocraft-cli" "$CLI_DIR/"
 copy_docs "$CLI_DIR"
 # Same Developer ID and hardened runtime as the app, with an explicit reverse-DNS identifier
 # (codesign would otherwise use the bare file name).
-sign --options runtime --identifier ai.storyteller.photocraft-cli "$CLI_DIR/photocraft-cli"
+sign --options runtime --identifier app.useaify.pictures-cli "$CLI_DIR/photocraft-cli"
 codesign --verify --strict --verbose=2 "$CLI_DIR/photocraft-cli"
 rm -f "$CLI_ZIP"
 ditto -c -k --keepParent "$CLI_DIR" "$CLI_ZIP"

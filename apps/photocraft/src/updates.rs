@@ -3,6 +3,7 @@
 
 use photocraft_engine::updates_cmds::{CheckFn, CheckResult, Release};
 
+#[allow(dead_code)] // @Pictures turns the check off (services.rs); kept to ease upstream merges.
 pub fn service() -> CheckFn {
     Box::new(|| {
         let (tx, rx) = std::sync::mpsc::channel();

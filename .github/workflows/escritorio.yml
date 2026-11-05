@@ -1,0 +1,124 @@
+# @Pictures para escritorio: la app nativa de Mac (universal, Apple silicon e Intel) y de Windows
+# (x86_64), sin firmar, subida a una GitHub Release.
+#
+# - Al subir una etiqueta `v*` (p. ej. `git tag v0.17.0 && git push origin v0.17.0`) compila las
+#   dos y crea la Release con los dos archivos.
+# - A mano (Actions ▸ Escritorio ▸ Run workflow) solo compila: los archivos quedan como
+#   artefactos de la ejecución, sin Release.
+#
+# Los nombres de los archivos no llevan versión, así que estos enlaces siempre dan la última:
+#   https://github.com/dylanstillavato/aify-pictures/releases/latest/download/Aify-Pictures-Mac.dmg
+#   https://github.com/dylanstillavato/aify-pictures/releases/latest/download/Aify-Pictures-Windows.zip
+#
+# Sin firma: en Mac, la primera vez, clic derecho ▸ Abrir (o Ajustes del Sistema ▸ Privacidad y
+# seguridad ▸ Abrir igualmente); en Windows, SmartScreen ▸ Más información ▸ Ejecutar de todas formas.
+# La Release de PhotoCraft (release.yml, firmada) no se toca.
+name: Escritorio
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: escritorio-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  # Las tipografías de craft-fonts que lleva PhotoCraft oficial (mismo commit que release.yml).
+  CRAFT_FONTS_REF: b076417b5880bd4154bd22f00695b1d28c6bea83
+
+jobs:
+  mac:
+    name: Mac (universal)
+    runs-on: macos-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: storytold/craft-fonts
+          ref: ${{ env.CRAFT_FONTS_REF }}
+          path: craft-fonts
+      - name: Rust para Apple silicon e Intel
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: escritorio-mac
+      - name: Compilar y empaquetar @Pictures.app en un DMG
+        env:
+          CRAFT_FONTS_DIR: ${{ github.workspace }}/craft-fonts
+        run: packaging/macos/package.sh --arch universal
+      - name: Nombre fijo para el enlace de descarga
+        run: |
+          mkdir -p out
+          cp dist/release/aify-pictures-*-macos-universal.dmg out/Aify-Pictures-Mac.dmg
+          ls -lh out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: out/Aify-Pictures-Mac.dmg
+          if-no-files-found: error
+
+  windows:
+    name: Windows (x86_64)
+    runs-on: windows-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: storytold/craft-fonts
+          ref: ${{ env.CRAFT_FONTS_REF }}
+          path: craft-fonts
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: escritorio-windows
+      - name: Compilar @Pictures.exe
+        shell: pwsh
+        env:
+          CRAFT_FONTS_DIR: ${{ github.workspace }}/craft-fonts
+          # CRT estático: no hace falta el redistribuible de Visual C++ (como packaging/windows/package.ps1).
+          CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS: -C target-feature=+crt-static
+          # Falla si no puede meter el icono y la versión en el .exe.
+          PHOTOCRAFT_REQUIRE_WINRES: "1"
+          PHOTOCRAFT_BUILD_SHA: ${{ github.sha }}
+        run: cargo build --release --locked -p photocraft --features heif --target x86_64-pc-windows-msvc
+      - name: Empaquetar en un zip
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'stage\@Pictures'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item 'target\x86_64-pc-windows-msvc\release\photocraft.exe' (Join-Path $stage '@Pictures.exe')
+          Copy-Item README.md, LICENSE-MIT, LICENSE-APACHE, NOTICE, ATTRIBUTION.md $stage
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Compress-Archive -Path $stage -DestinationPath 'out\Aify-Pictures-Windows.zip' -Force
+          Get-ChildItem out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/Aify-Pictures-Windows.zip
+          if-no-files-found: error
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [mac, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Crear la Release con los dos archivos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -lh out
+          gh release create "$GITHUB_REF_NAME" out/Aify-Pictures-Mac.dmg out/Aify-Pictures-Windows.zip \
+            --repo "$GITHUB_REPOSITORY" --title "@Pictures $GITHUB_REF_NAME" \
+            --notes "Descarga: Mac (Aify-Pictures-Mac.dmg) o Windows (Aify-Pictures-Windows.zip). Sin firmar: en Mac, la primera vez, clic derecho ▸ Abrir; en Windows, SmartScreen ▸ Más información ▸ Ejecutar de todas formas."
